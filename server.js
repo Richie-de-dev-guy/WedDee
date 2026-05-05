@@ -384,6 +384,19 @@ app.use(cors())
 app.use(express.json())
 app.use('/uploads', express.static(uploadDir))
 
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'WedDee backend is running.',
+  })
+})
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+  })
+})
+
 function requireAdmin(req, res, next) {
   if (!ADMIN_TOKEN) {
     return res.status(503).json({ error: 'Admin token is not configured.' })

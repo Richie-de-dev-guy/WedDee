@@ -3,6 +3,26 @@ import jsQR from 'jsqr'
 import logo from './Socialicons.png'
 import './App.css'
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '')
+
+function buildApiUrl(path) {
+  return API_BASE_URL ? `${API_BASE_URL}${path}` : path
+}
+
+function buildAssetUrl(path) {
+  if (!path) return path
+  if (/^https?:\/\//i.test(path)) return path
+  if (path.startsWith('/') && API_BASE_URL) return `${API_BASE_URL}${path}`
+  return path
+}
+
+function normalizeProduct(product) {
+  return {
+    ...product,
+    image: buildAssetUrl(product.image),
+  }
+}
+
 const _brand = {
   name: 'WedDee’s Signature Bistro',
   location: 'Calabar, Cross River State, Nigeria',
@@ -315,7 +335,7 @@ function App() {
     setScannerError('')
     setScannerMessage(`Scanned order ${orderId}. Verifying payment...`)
     try {
-      const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}`)
+      const response = await fetch(buildApiUrl(`/api/orders/${encodeURIComponent(orderId)}`))
       if (!response.ok) {
         setScannerError('Order not found for this QR code.')
         setScannerMessage('')
@@ -449,10 +469,10 @@ function App() {
 
   const fetchMenuItems = async () => {
     try {
-      const response = await fetch('/api/products')
+      const response = await fetch(buildApiUrl('/api/products'))
       if (!response.ok) return
       const data = await response.json()
-      setMenuItems(data.products)
+      setMenuItems((data.products || []).map(normalizeProduct))
     } catch (error) {
       console.error('Failed to fetch menu items', error)
     }
@@ -492,7 +512,7 @@ function App() {
     if (!customerEmail) return
 
     try {
-      const response = await fetch(`/api/customer/orders?email=${encodeURIComponent(customerEmail)}`)
+      const response = await fetch(buildApiUrl(`/api/customer/orders?email=${encodeURIComponent(customerEmail)}`))
       if (!response.ok) return
       const data = await response.json()
       setCustomerOrders(data.orders || [])
@@ -504,7 +524,7 @@ function App() {
   const fetchAdminOrders = async () => {
     if (!adminToken) return
     try {
-      const response = await fetch('/api/admin/orders', {
+      const response = await fetch(buildApiUrl('/api/admin/orders'), {
         headers: {
           Authorization: `Bearer ${adminToken}`,
         },
@@ -592,7 +612,7 @@ function App() {
   const verifyPayment = useEffectEvent(async (reference) => {
     setPaymentStatus('processing')
     try {
-      const response = await fetch(`/api/paystack/verify?reference=${encodeURIComponent(reference)}`)
+      const response = await fetch(buildApiUrl(`/api/paystack/verify?reference=${encodeURIComponent(reference)}`))
       const data = await response.json().catch(() => null)
       if (!response.ok || !data?.order) {
         console.error('Verify error', response.status, data)
@@ -669,7 +689,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch(buildApiUrl('/api/orders'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -736,7 +756,7 @@ function App() {
       const formData = new FormData()
       formData.append('image', menuEdit.imageFile.file)
       try {
-        const uploadResponse = await fetch('/api/upload', {
+        const uploadResponse = await fetch(buildApiUrl('/api/upload'), {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${adminToken}`,
@@ -750,7 +770,7 @@ function App() {
           return
         }
         const uploadData = await uploadResponse.json()
-        imageUrl = uploadData.imageUrl
+        imageUrl = buildAssetUrl(uploadData.imageUrl)
       } catch (error) {
         console.error('Upload error', error)
         alert('Failed to upload image. Please try again.')
@@ -769,7 +789,7 @@ function App() {
 
     if (adminToken) {
       try {
-        const response = await fetch('/api/products', {
+        const response = await fetch(buildApiUrl('/api/products'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -803,7 +823,7 @@ function App() {
     }
 
     try {
-      const response = await fetch(`/api/orders/${id}/status`, {
+      const response = await fetch(buildApiUrl(`/api/orders/${id}/status`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -846,7 +866,7 @@ function App() {
       return
     }
     try {
-      const response = await fetch(`/api/products/${id}`, {
+      const response = await fetch(buildApiUrl(`/api/products/${id}`), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${adminToken}`,
@@ -876,7 +896,7 @@ function App() {
       return
     }
     try {
-      const response = await fetch('/api/admin/login', {
+      const response = await fetch(buildApiUrl('/api/admin/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: passwordValue }),
@@ -892,7 +912,7 @@ function App() {
       setView('admin')
       await fetchAdminOrders()
     } catch (error) {
-      setAdminLoginError('Unable to reach the admin server. Start the backend on port 4000 and try again.')
+      setAdminLoginError('Unable to reach the admin server. Check that the backend URL is running and try again.')
       setAdminPassword('')
       console.error(error)
     } finally {
