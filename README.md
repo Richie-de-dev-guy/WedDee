@@ -80,10 +80,10 @@ A modern, full-stack ordering system for WedDee’s Signature Bistro in Calabar,
 3. **Set up environment variables**
    Create a `.env` file in the root directory:
    ```env
-   ADMIN_PASSWORD=your-admin-password
-   ADMIN_TOKEN=weddee-admin-token
-   PAYSTACK_SECRET_KEY=sk_live_your-live-secret-key
-   PAYSTACK_PUBLIC_KEY=pk_live_your-live-public-key
+   ADMIN_PASSWORD=<set-this-in-your-hosting-dashboard>
+   ADMIN_TOKEN=<set-this-in-your-hosting-dashboard>
+   PAYSTACK_SECRET_KEY=<paystack-secret-key>
+   PAYSTACK_PUBLIC_KEY=<paystack-public-key>
    PAYSTACK_CALLBACK_URL=https://yourdomain.com/
    ```
 
@@ -111,8 +111,8 @@ For email notifications, add these variables:
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_SECURE=false
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+EMAIL_USER=<smtp-user>
+EMAIL_PASS=<smtp-app-password>
 ```
 
 ## 🏃‍♂️ Running the Application

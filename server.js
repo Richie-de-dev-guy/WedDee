@@ -44,8 +44,8 @@ const upload = multer({
 })
 
 const PORT = process.env.PORT || 4000
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD?.trim() || 'Wed1234@'
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN?.trim() || 'weddee-admin-token'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD?.trim() || ''
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN?.trim() || ''
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY?.trim() || ''
 const PAYSTACK_CALLBACK_URL = process.env.PAYSTACK_CALLBACK_URL?.trim() || 'http://localhost:5173/'
 const EMAIL_HOST = process.env.EMAIL_HOST?.trim() || ''
@@ -64,10 +64,8 @@ const PLACEHOLDER_EMAIL_VALUES = new Set([
   'your-smtp-password',
 ])
 const PLACEHOLDER_PAYSTACK_VALUES = new Set([
-  'sk_test_yourkey',
-  'sk_live_yourkey',
-  'pk_test_yourkey',
-  'pk_live_yourkey',
+  'your-paystack-secret-key',
+  'your-paystack-public-key',
 ])
 
 function buildCallbackUrl(baseUrl, reference) {
@@ -387,6 +385,9 @@ app.use(express.json())
 app.use('/uploads', express.static(uploadDir))
 
 function requireAdmin(req, res, next) {
+  if (!ADMIN_TOKEN) {
+    return res.status(503).json({ error: 'Admin token is not configured.' })
+  }
   const auth = req.headers.authorization || ''
   const [, token] = auth.split(' ')
   if (token !== ADMIN_TOKEN) {
@@ -465,6 +466,9 @@ app.delete('/api/products/:id', requireAdmin, async (req, res) => {
 })
 
 app.post('/api/admin/login', async (req, res) => {
+  if (!ADMIN_PASSWORD || !ADMIN_TOKEN) {
+    return res.status(503).json({ error: 'Admin login is not configured.' })
+  }
   const { password } = req.body
   if (password !== ADMIN_PASSWORD) {
     return res.status(401).json({ error: 'Unauthorized' })
