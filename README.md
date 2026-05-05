@@ -104,6 +104,16 @@ A modern, full-stack ordering system for WedDee’s Signature Bistro in Calabar,
 | `PAYSTACK_PUBLIC_KEY` | Paystack live public key | Yes (for live payments) |
 | `PAYSTACK_CALLBACK_URL` | URL for payment callbacks | Yes |
 
+### Netlify Note
+
+This project includes an Express backend in `server.js`. A standard Netlify static deploy does not run that backend.
+
+If you deploy only the Vite frontend to Netlify:
+
+- Do not add server-only secrets like `ADMIN_PASSWORD`, `ADMIN_TOKEN`, `PAYSTACK_SECRET_KEY`, or `EMAIL_*` unless you are also running the backend on Netlify Functions or another server runtime.
+- Host the backend separately on a Node-friendly platform such as Render, Railway, or Fly.io.
+- If Netlify still flags intentionally configured environment variables, set `SECRETS_SCAN_OMIT_KEYS` in the Netlify dashboard for the exact keys you expect.
+
 ### Email Configuration (Optional)
 
 For email notifications, add these variables:
