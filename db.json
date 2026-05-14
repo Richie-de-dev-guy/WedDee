@@ -1,6 +1,15 @@
 {
   "products": [
     {
+      "id": "special-shawarma-1778661881580",
+      "name": "Special Shawarma",
+      "category": "Specials",
+      "price": 4500,
+      "description": "More Fillings ",
+      "image": "/uploads/image-1778661881557-903338034.jpg",
+      "available": true
+    },
+    {
       "id": "malta-guinness-1776500606416",
       "name": "Malta Guinness",
       "category": "Drinks",
@@ -66,6 +75,246 @@
   ],
   "orders": [
     {
+      "id": "ORD-MP599JII",
+      "receiptNumber": "WSB-2026-025",
+      "createdAt": 1778749061130,
+      "checkoutMode": "pickup",
+      "pickupTime": "10:00 AM",
+      "deliveryAddress": null,
+      "deliveryNotes": null,
+      "customer": {
+        "name": "Richmond Effiom Henshaw",
+        "email": "richmondhenshaw35@gmail.com",
+        "contact": "07079332442"
+      },
+      "items": [
+        {
+          "id": "special-shawarma-1778661881580",
+          "name": "Special Shawarma",
+          "category": "Specials",
+          "price": 4500,
+          "description": "More Fillings ",
+          "image": "/uploads/image-1778661881557-903338034.jpg",
+          "quantity": 1
+        }
+      ],
+      "subtotal": 4500,
+      "deliveryFee": 0,
+      "total": 4500,
+      "paymentMethod": "online",
+      "paymentConfirmed": false,
+      "paymentReference": "WD-MP599JII-1OXG",
+      "status": "pending",
+      "lastStatusEmailSent": null
+    },
+    {
+      "id": "ORD-MP596Q14",
+      "receiptNumber": "WSB-2026-024",
+      "createdAt": 1778748929608,
+      "checkoutMode": "pickup",
+      "pickupTime": "10:00 AM",
+      "deliveryAddress": null,
+      "deliveryNotes": null,
+      "customer": {
+        "name": "Richmond Effiom Henshaw",
+        "email": "richmondhenshaw35@gmail.com",
+        "contact": "07079332442"
+      },
+      "items": [
+        {
+          "id": "special-shawarma-1778661881580",
+          "name": "Special Shawarma",
+          "category": "Specials",
+          "price": 4500,
+          "description": "More Fillings ",
+          "image": "/uploads/image-1778661881557-903338034.jpg",
+          "quantity": 2
+        }
+      ],
+      "subtotal": 9000,
+      "deliveryFee": 0,
+      "total": 9000,
+      "paymentMethod": "cod",
+      "paymentConfirmed": true,
+      "paymentReference": "WD-MP596Q14-8IND",
+      "status": "completed",
+      "lastStatusEmailSent": null
+    },
+    {
+      "id": "ORD-MP3TMENS",
+      "receiptNumber": "WSB-2026-023",
+      "createdAt": 1778662321336,
+      "checkoutMode": "pickup",
+      "pickupTime": "10:00 AM",
+      "deliveryAddress": null,
+      "deliveryNotes": null,
+      "customer": {
+        "name": "Richmond Effiom Henshaw",
+        "email": "richmondhenshaw35@gmail.com",
+        "contact": "07079332442"
+      },
+      "items": [
+        {
+          "id": "special-shawarma-1778661881580",
+          "name": "Special Shawarma",
+          "category": "Specials",
+          "price": 4500,
+          "description": "More Fillings ",
+          "image": "/uploads/image-1778661881557-903338034.jpg",
+          "quantity": 10
+        },
+        {
+          "id": "malta-guinness-1776500606416",
+          "name": "Malta Guinness",
+          "category": "Drinks",
+          "price": 1000,
+          "description": "35CL, Can ",
+          "image": "/uploads/image-1776500606401-565490376.jpg",
+          "quantity": 10
+        }
+      ],
+      "subtotal": 55000,
+      "deliveryFee": 0,
+      "total": 55000,
+      "paymentMethod": "cod",
+      "paymentConfirmed": true,
+      "paymentReference": "WD-MP3TMENS-3659",
+      "status": "completed",
+      "lastStatusEmailSent": null,
+      "archivedFromCustomerViewAt": 1778748929711
+    },
+    {
+      "id": "ORD-MP3TAMW9",
+      "receiptNumber": "WSB-2026-022",
+      "createdAt": 1778661772137,
+      "checkoutMode": "delivery",
+      "pickupTime": null,
+      "deliveryAddress": "Marian",
+      "deliveryNotes": "12",
+      "customer": {
+        "name": "Richmond Effiom Henshaw",
+        "email": "richmondhenshaw35@gmail.com",
+        "contact": "07079332442"
+      },
+      "items": [
+        {
+          "id": "malta-guinness-1776500606416",
+          "name": "Malta Guinness",
+          "category": "Drinks",
+          "price": 1000,
+          "description": "35CL, Can ",
+          "image": "/uploads/image-1776500606401-565490376.jpg",
+          "quantity": 1
+        },
+        {
+          "id": "coco-cola-1776500576113",
+          "name": "Coco Cola",
+          "category": "Drinks",
+          "price": 500,
+          "description": "50CL",
+          "image": "/uploads/image-1776500576098-2364269.jpg",
+          "quantity": 1
+        },
+        {
+          "id": "sprite-1776500552071",
+          "name": "Sprite",
+          "category": "Drinks",
+          "price": 500,
+          "description": "50CL",
+          "image": "/uploads/image-1776500552057-531726548.jpg",
+          "quantity": 1
+        },
+        {
+          "id": "fanta-1776500523031",
+          "name": "Fanta",
+          "category": "Drinks",
+          "price": 500,
+          "description": "50CL",
+          "image": "/uploads/image-1776500523018-396332427.jpg",
+          "quantity": 1
+        },
+        {
+          "id": "chicken-pie-1776500487580",
+          "name": "Chicken Pie",
+          "category": "Pastries",
+          "price": 1500,
+          "description": "Signature Chruncy Chicken Pie ",
+          "image": "/uploads/image-1776500487567-493947010.jpg",
+          "quantity": 1
+        },
+        {
+          "id": "weddee-s-regular-shawarma-1776500454220",
+          "name": "WedDee's Regular Shawarma",
+          "category": "Specials",
+          "price": 3500,
+          "description": "Beef and Chicken",
+          "image": "/uploads/image-1776500454203-276778790.jpg",
+          "quantity": 1
+        },
+        {
+          "id": "the-kings-bite-1776500414680",
+          "name": "The Kings Bite",
+          "category": "Pastries",
+          "price": 1500,
+          "description": "Signature Chruncy Meat Pie ",
+          "image": "/uploads/image-1776500414635-936898423.jpg",
+          "quantity": 1
+        }
+      ],
+      "subtotal": 9000,
+      "deliveryFee": 1000,
+      "total": 10000,
+      "paymentMethod": "cod",
+      "paymentConfirmed": true,
+      "paymentReference": "WD-MP3TAMW9-CDNN",
+      "status": "completed",
+      "lastStatusEmailSent": null,
+      "archivedFromCustomerViewAt": 1778748929711
+    },
+    {
+      "id": "ORD-MP3T8U9M",
+      "receiptNumber": "WSB-2026-021",
+      "createdAt": 1778661688378,
+      "checkoutMode": "delivery",
+      "pickupTime": null,
+      "deliveryAddress": "Effioette",
+      "deliveryNotes": "12",
+      "customer": {
+        "name": "Richmond Effiom Henshaw",
+        "email": "richmondhenshaw35@gmail.com",
+        "contact": "07079332442"
+      },
+      "items": [
+        {
+          "id": "malta-guinness-1776500606416",
+          "name": "Malta Guinness",
+          "category": "Drinks",
+          "price": 1000,
+          "description": "35CL, Can ",
+          "image": "/uploads/image-1776500606401-565490376.jpg",
+          "quantity": 1
+        },
+        {
+          "id": "chicken-pie-1776500487580",
+          "name": "Chicken Pie",
+          "category": "Pastries",
+          "price": 1500,
+          "description": "Signature Chruncy Chicken Pie ",
+          "image": "/uploads/image-1776500487567-493947010.jpg",
+          "quantity": 1
+        }
+      ],
+      "subtotal": 2500,
+      "deliveryFee": 2000,
+      "total": 4500,
+      "paymentMethod": "cod",
+      "paymentConfirmed": true,
+      "paymentReference": "WD-MP3T8U9M-3CZG",
+      "status": "completed",
+      "lastStatusEmailSent": null,
+      "archivedFromCustomerViewAt": 1778748929711
+    },
+    {
       "id": "ORD-MOKC4B4N",
       "receiptNumber": "WSB-2026-020",
       "createdAt": 1777484066135,
@@ -108,7 +357,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOKC4B4N-NEE4",
       "status": "completed",
-      "lastStatusEmailSent": null
+      "lastStatusEmailSent": null,
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOEBFF0O",
@@ -328,7 +578,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOE9W0V6-RBJW",
       "status": "completed",
-      "lastStatusEmailSent": "confirmed"
+      "lastStatusEmailSent": "confirmed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOCXPRKU",
@@ -373,7 +624,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOCXPRKU-I4XY",
       "status": "completed",
-      "lastStatusEmailSent": "confirmed"
+      "lastStatusEmailSent": "confirmed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOBFIMNV",
@@ -418,7 +670,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOBFIMNU-GL39",
       "status": "completed",
-      "lastStatusEmailSent": "confirmed"
+      "lastStatusEmailSent": "confirmed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOBFHWYJ",
@@ -463,7 +716,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOBFHWYJ-JQIX",
       "status": "completed",
-      "lastStatusEmailSent": "confirmed"
+      "lastStatusEmailSent": "confirmed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOBFF6HB",
@@ -498,7 +752,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOBFF6HB-MS19",
       "status": "completed",
-      "lastStatusEmailSent": "ready"
+      "lastStatusEmailSent": "ready",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOABKP1U",
@@ -533,7 +788,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOABKP1U-PFVF",
       "status": "completed",
-      "lastStatusEmailSent": "confirmed"
+      "lastStatusEmailSent": "confirmed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOABF0JP",
@@ -568,7 +824,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOABF0JP-14NZ",
       "status": "completed",
-      "lastStatusEmailSent": "confirmed"
+      "lastStatusEmailSent": "confirmed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOABAVYY",
@@ -603,7 +860,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOABAVYY-MV6V",
       "status": "completed",
-      "lastStatusEmailSent": "confirmed"
+      "lastStatusEmailSent": "confirmed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOAB40EP",
@@ -638,7 +896,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOAB40EP-4GDI",
       "status": "completed",
-      "lastStatusEmailSent": "confirmed"
+      "lastStatusEmailSent": "confirmed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOAAJQDH",
@@ -673,7 +932,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOAAJQDH-MVCY",
       "status": "completed",
-      "lastStatusEmailSent": "completed"
+      "lastStatusEmailSent": "completed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOA7UFI3",
@@ -708,7 +968,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOA7UFI3-ZXIZ",
       "status": "completed",
-      "lastStatusEmailSent": "completed"
+      "lastStatusEmailSent": "completed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MOA7NAIW",
@@ -743,7 +1004,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MOA7NAIW-IC3W",
       "status": "completed",
-      "lastStatusEmailSent": "completed"
+      "lastStatusEmailSent": "completed",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MO43D6J9",
@@ -778,7 +1040,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MO43D6J7-Z128",
       "status": "completed",
-      "paidAt": "2026-04-18T08:46:49.000Z"
+      "paidAt": "2026-04-18T08:46:49.000Z",
+      "archivedFromCustomerViewAt": 1778748929711
     },
     {
       "id": "ORD-MO42N1O5",
@@ -813,7 +1076,8 @@
       "paymentConfirmed": true,
       "paymentReference": "WD-MO42N1O5-67UW",
       "status": "completed",
-      "paidAt": "2026-04-18T08:26:17.000Z"
+      "paidAt": "2026-04-18T08:26:17.000Z",
+      "archivedFromCustomerViewAt": 1778748929711
     }
   ]
 }

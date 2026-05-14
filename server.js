@@ -67,6 +67,7 @@ const PLACEHOLDER_PAYSTACK_VALUES = new Set([
   'your-paystack-secret-key',
   'your-paystack-public-key',
 ])
+const CUSTOMER_ORDER_VISIBILITY_WINDOW_MS = 24 * 60 * 60 * 1000
 
 function buildCallbackUrl(baseUrl, reference) {
   const trimmed = baseUrl.replace(/[?&]$/, '')
@@ -97,27 +98,37 @@ function hasPlaceholderPaystackConfig() {
 
 async function createEmailTransporter() {
   if (hasConfiguredEmailCredentials() && !hasPlaceholderEmailConfig()) {
-    const transporter = nodemailer.createTransport({
-      host: EMAIL_HOST,
-      port: EMAIL_PORT,
-      secure: EMAIL_SECURE,
-      auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS,
-      },
-      family: EMAIL_FORCE_IPV4 ? 4 : undefined,
-      tls: {
-        servername: EMAIL_HOST,
-        rejectUnauthorized: !EMAIL_ALLOW_SELF_SIGNED,
-      },
-    })
+    try {
+      const transporter = nodemailer.createTransport({
+        host: EMAIL_HOST,
+        port: EMAIL_PORT,
+        secure: EMAIL_SECURE,
+        auth: {
+          user: EMAIL_USER,
+          pass: EMAIL_PASS,
+        },
+        family: EMAIL_FORCE_IPV4 ? 4 : undefined,
+        tls: {
+          servername: EMAIL_HOST,
+          rejectUnauthorized: !EMAIL_ALLOW_SELF_SIGNED,
+        },
+      })
 
-    await transporter.verify()
-    console.log(`SMTP email transport ready on ${EMAIL_HOST}:${EMAIL_PORT}.`)
-    if (EMAIL_ALLOW_SELF_SIGNED) {
-      console.warn('SMTP is accepting a self-signed certificate because EMAIL_ALLOW_SELF_SIGNED=true.')
+      // Verify transporter in background, but don't fail if verify fails
+      transporter.verify().then(() => {
+        console.log(`✓ SMTP email transport verified on ${EMAIL_HOST}:${EMAIL_PORT}.`)
+        if (EMAIL_ALLOW_SELF_SIGNED) {
+          console.warn('⚠ SMTP is accepting a self-signed certificate because EMAIL_ALLOW_SELF_SIGNED=true.')
+        }
+      }).catch((error) => {
+        console.warn(`⚠ SMTP verification failed (email sending may still work): ${error.message}`)
+      })
+      
+      return transporter
+    } catch (error) {
+      console.warn(`Email transport creation failed: ${error.message}`)
+      return null
     }
-    return transporter
   }
 
   if (hasPlaceholderEmailConfig()) {
@@ -154,88 +165,7 @@ async function initDb() {
   }
 
   db.data ||= {
-    products: [
-      {
-        id: 'croissant-bliss',
-        name: 'Signature Butter Croissant',
-        category: 'Pastries',
-        price: 1700,
-        description: 'Flaky, golden, and layered with signature butter.',
-        image:
-          'https://images.unsplash.com/photo-1506084868230-bb9d95c24759?auto=format&fit=crop&w=700&q=80',
-        available: true,
-      },
-      {
-        id: 'cinnamon-roll',
-        name: 'Cinnamon Spice Roll',
-        category: 'Pastries',
-        price: 1500,
-        description: 'Soft dough with warm cinnamon sugar and caramel glaze.',
-        image:
-          'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=700&q=80',
-        available: true,
-      },
-      {
-        id: 'latte-smooth',
-        name: 'Velvet Cardamom Latte',
-        category: 'Drinks',
-        price: 1400,
-        description: 'Creamy espresso with nutty cardamom and golden milk foam.',
-        image:
-          'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=700&q=80',
-        available: true,
-      },
-      {
-        id: 'matcha-cool',
-        name: 'Iced Matcha Shake',
-        category: 'Drinks',
-        price: 1300,
-        description: 'Bright green matcha, milk, and a splash of honey.',
-        image:
-          'https://images.unsplash.com/photo-1521305916504-4a1121188589?auto=format&fit=crop&w=700&q=80',
-        available: true,
-      },
-      {
-        id: 'pastry-pair',
-        name: 'Morning Pastry Pair',
-        category: 'Combos',
-        price: 3200,
-        description: 'Two pastries and your choice of latte or juice.',
-        image:
-          'https://images.unsplash.com/photo-1512058564366-c9e2f6833d87?auto=format&fit=crop&w=700&q=80',
-        available: true,
-      },
-      {
-        id: 'sunrise-box',
-        name: 'Sunrise Brunch Box',
-        category: 'Combos',
-        price: 5200,
-        description: 'Croissant, fruit parfait, espresso, plus special juice.',
-        image:
-          'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=700&q=80',
-        available: true,
-      },
-      {
-        id: 'weekend-slice',
-        name: 'Weekend Cheesecake Slice',
-        category: 'Specials',
-        price: 2200,
-        description: 'Rich cheesecake with caramel drizzle and roasted nuts.',
-        image:
-          'https://images.unsplash.com/photo-1546554137-f86b9593a222?auto=format&fit=crop&w=700&q=80',
-        available: true,
-      },
-      {
-        id: 'ginger-espresso',
-        name: 'Ginger Espresso Tonic',
-        category: 'Specials',
-        price: 1800,
-        description: 'Sparkling tonic, espresso shot, and fresh ginger twist.',
-        image:
-          'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=700&q=80',
-        available: true,
-      },
-    ],
+    products: [],
     orders: [],
   }
   await db.write()
@@ -325,7 +255,6 @@ async function sendOrderConfirmationEmail(order) {
     `Customer phone: ${order.customer.contact}`,
     `Receipt number: ${receiptId}`,
     `Order total: ${formatCurrency(order.total)}`,
-    `Taxes: ${formatCurrency(order.taxes)}`,
     `Delivery fee: ${formatCurrency(order.deliveryFee || 0)}`,
     order.checkoutMode === 'delivery' ? `Delivery address: ${order.deliveryAddress || 'Not provided'}` : null,
     order.deliveryNotes ? `Delivery notes: ${order.deliveryNotes}` : null,
@@ -347,7 +276,6 @@ async function sendOrderConfirmationEmail(order) {
       <div style="margin: 16px 0; padding: 16px; background: #f8f9fa; border-radius: 8px;">
         <p><strong>Receipt Number:</strong> ${order.receiptNumber || order.id}</p>
         <p><strong>Order total:</strong> ${formatCurrency(order.total)}</p>
-        <p><strong>Taxes:</strong> ${formatCurrency(order.taxes)}</p>
         <p><strong>Delivery fee:</strong> ${formatCurrency(order.deliveryFee || 0)}</p>
         ${order.checkoutMode === 'delivery' ? `<p><strong>Delivery address:</strong> ${order.deliveryAddress || 'Not provided'}</p>` : ''}
         ${order.deliveryNotes ? `<p><strong>Delivery notes:</strong> ${order.deliveryNotes}</p>` : ''}
@@ -369,12 +297,65 @@ async function sendOrderConfirmationEmail(order) {
       html,
     })
 
+    console.log(`✓ Order receipt email sent for ${order.receiptNumber || order.id} to ${to}`)
     if (nodemailer.getTestMessageUrl(info)) {
       console.log('Preview email:', nodemailer.getTestMessageUrl(info))
     }
     return { status: 'sent' }
   } catch (error) {
-    console.warn(`Order email could not be sent for ${order.receiptNumber || order.id}: ${error.message}`)
+    console.warn(`✗ Order email could not be sent for ${order.receiptNumber || order.id} to ${to}: ${error.message}`)
+    return { status: 'failed', reason: error.message }
+  }
+}
+
+function isOrderOlderThanCustomerWindow(order) {
+  const createdAt = Number(order?.createdAt || 0)
+  return Boolean(createdAt) && Date.now() - createdAt >= CUSTOMER_ORDER_VISIBILITY_WINDOW_MS
+}
+
+async function archiveExpiredCustomerOrders() {
+  await db.read()
+  let hasChanges = false
+
+  for (const order of db.data.orders) {
+    if (!order.paymentConfirmed || !isOrderOlderThanCustomerWindow(order)) {
+      continue
+    }
+
+    if (order.status !== 'completed') {
+      order.status = 'completed'
+      order.completedAt ||= Date.now()
+      hasChanges = true
+    }
+
+    if (!order.archivedFromCustomerViewAt) {
+      order.archivedFromCustomerViewAt = Date.now()
+      hasChanges = true
+    }
+  }
+
+  if (hasChanges) {
+    await db.write()
+  }
+}
+
+async function queueOrderConfirmationEmail(orderId) {
+  try {
+    await db.read()
+    const order = db.data.orders.find((entry) => entry.id === orderId)
+    if (!order) {
+      return { status: 'skipped', reason: 'order-not-found' }
+    }
+
+    const emailDelivery = await sendOrderConfirmationEmail(order)
+    if (emailDelivery?.status === 'sent') {
+      order.lastStatusEmailSent = order.status
+      await db.write()
+    }
+
+    return emailDelivery
+  } catch (error) {
+    console.warn(`Order email queue failed for ${orderId}: ${error.message}`)
     return { status: 'failed', reason: error.message }
   }
 }
@@ -514,16 +495,17 @@ app.get('/api/customer/orders', async (req, res) => {
     return res.status(400).json({ error: 'Customer email is required.' })
   }
 
+  await archiveExpiredCustomerOrders()
   await db.read()
   const customerOrders = db.data.orders.filter((order) =>
-    order.customer?.email === email && order.paymentConfirmed
+    order.customer?.email === email && order.paymentConfirmed && !isOrderOlderThanCustomerWindow(order)
   ).sort((a, b) => b.createdAt - a.createdAt)
 
   res.json({ orders: customerOrders })
 })
 
 app.post('/api/orders', async (req, res) => {
-  const { customer, items, checkoutMode, pickupTime, deliveryAddress, deliveryNotes, paymentMethod, subtotal, taxes, deliveryFee, total } = req.body
+  const { customer, items, checkoutMode, pickupTime, deliveryAddress, deliveryNotes, paymentMethod, subtotal, deliveryFee, total } = req.body
   if (!customer?.name || !customer?.email || !customer?.contact || !items?.length) {
     return res.status(400).json({ error: 'Customer name, email, contact, and items are required.' })
   }
@@ -542,7 +524,6 @@ app.post('/api/orders', async (req, res) => {
     customer,
     items,
     subtotal,
-    taxes,
     deliveryFee: deliveryFee || 0,
     total,
     paymentMethod,
@@ -556,12 +537,8 @@ app.post('/api/orders', async (req, res) => {
 
   // Send receipt email for pay on delivery immediately
   if (paymentMethod === 'cod') {
-    const emailDelivery = await sendOrderConfirmationEmail(order)
-    if (emailDelivery?.status === 'sent') {
-      order.lastStatusEmailSent = order.status
-      await db.write()
-    }
-    return res.json({ order, emailDelivery })
+    void queueOrderConfirmationEmail(order.id)
+    return res.json({ order, emailDelivery: { status: 'pending' } })
   }
 
   
@@ -651,13 +628,9 @@ app.get('/api/paystack/verify', async (req, res) => {
   order.paidAt = paymentInfo.paid_at || Date.now()
   await db.write()
 
-  const emailDelivery = await sendOrderConfirmationEmail(order)
-  if (emailDelivery?.status === 'sent') {
-    order.lastStatusEmailSent = order.status
-    await db.write()
-  }
+  void queueOrderConfirmationEmail(order.id)
 
-  res.json({ order, emailDelivery })
+  res.json({ order, emailDelivery: { status: 'pending' } })
 })
 
 app.post('/api/orders/:id/status', requireAdmin, async (req, res) => {
@@ -677,10 +650,7 @@ app.post('/api/orders/:id/status', requireAdmin, async (req, res) => {
     order.lastStatusEmailSent !== status
 
   if (shouldSendEmail) {
-    const emailDelivery = await sendOrderConfirmationEmail(order)
-    if (emailDelivery?.status === 'sent') {
-      order.lastStatusEmailSent = status
-    }
+    void queueOrderConfirmationEmail(order.id)
   }
 
   await db.write()

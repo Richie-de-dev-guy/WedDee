@@ -16,12 +16,25 @@ function buildAssetUrl(path) {
   return path
 }
 
-function normalizeProduct(product) {
-  return {
-    ...product,
-    image: buildAssetUrl(product.image),
+function getRestaurantStatus() {
+  const now = new Date()
+  const hours = now.getHours()
+  const minutes = now.getMinutes()
+  const currentTime = hours * 60 + minutes
+  
+  const openingTime = 8 * 60 + 30
+  const closingTime = 20 * 60 + 30
+  
+  if (currentTime >= openingTime && currentTime < closingTime) {
+    return 'open'
+  } else if (currentTime < openingTime) {
+    return 'opening-soon'
+  } else {
+    return 'closed'
   }
 }
+
+
 
 const _brand = {
   name: 'WedDee’s Signature Bistro',
@@ -29,84 +42,7 @@ const _brand = {
   highlight: 'Warm pours. Sweet moments.',
 }
 
-const categories = ['All', 'Pastries', 'Drinks', 'Combos', 'Specials']
-
-const initialMenu = [
-  {
-    id: 'croissant-bliss',
-    name: 'Signature Butter Croissant',
-    category: 'Pastries',
-    price: 1700,
-    description: 'Flaky, golden, and layered with signature butter.',
-    image:
-      'https://images.unsplash.com/photo-1506084868230-bb9d95c24759?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    id: 'cinnamon-roll',
-    name: 'Cinnamon Spice Roll',
-    category: 'Pastries',
-    price: 1500,
-    description: 'Soft dough with warm cinnamon sugar and caramel glaze.',
-    image:
-      'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    id: 'latte-smooth',
-    name: 'Velvet Cardamom Latte',
-    category: 'Drinks',
-    price: 1400,
-    description: 'Creamy espresso with nutty cardamom and golden milk foam.',
-    image:
-      'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    id: 'matcha-cool',
-    name: 'Iced Matcha Shake',
-    category: 'Drinks',
-    price: 1300,
-    description: 'Bright green matcha, milk, and a splash of honey.',
-    image:
-      'https://images.unsplash.com/photo-1521305916504-4a1121188589?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    id: 'pastry-pair',
-    name: 'Morning Pastry Pair',
-    category: 'Combos',
-    price: 3200,
-    description: 'Two pastries and your choice of latte or juice.',
-    image:
-      'https://images.unsplash.com/photo-1512058564366-c9e2f6833d87?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    id: 'sunrise-box',
-    name: 'Sunrise Brunch Box',
-    category: 'Combos',
-    price: 5200,
-    description: 'Croissant, fruit parfait, espresso, plus special juice.',
-    image:
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    id: 'weekend-slice',
-    name: 'Weekend Cheesecake Slice',
-    category: 'Specials',
-    price: 2200,
-    description: 'Rich cheesecake with caramel drizzle and roasted nuts.',
-    image:
-      'https://images.unsplash.com/photo-1546554137-f86b9593a222?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    id: 'ginger-espresso',
-    name: 'Ginger Espresso Tonic',
-    category: 'Specials',
-    price: 1800,
-    description: 'Sparkling tonic, espresso shot, and fresh ginger twist.',
-    image:
-      'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=700&q=80',
-  },
-]
-
-const taxRate = 0.075
+const categories = ['All', 'Pastries', 'Drinks', 'Combos', 'Specials', 'Food']
 
 const deliveryFeesByArea = [
   { names: ['marian'], fee: 1000 },
@@ -115,6 +51,17 @@ const deliveryFeesByArea = [
   { names: ['ettagbor', 'mary slessor', 'calabar calabar', 'satellite town', 'ibb', 'atu', 'mayne avenue', 'amika otuk', 'orok orok', 'goldie', 'uwanse', 'parliamentary extension', 'edibe edibe', 'anantiga'], fee: 1500 },
   { names: ['palm street', 'army junction', 'esuk otu/nta', 'cicc', 'habor', 'federal housing', 't junction', 'unical', 'atimbo', 'atamunu', 'ekpo abasi', 'musaha', 'technical round about', 'nyagasa', 'jebs', 'lemna', '8miles', '8 miles', 'ikot effanga', 'cent apartment', 'scanobo', 'tinapa'], fee: 2000 },
 ]
+
+function normalizeProduct(product) {
+  return {
+    id: product.id,
+    name: product.name,
+    category: product.category || 'Specials',
+    price: product.price,
+    description: product.description,
+    image: product.image,
+  }
+}
 
 function getDeliveryFee(area) {
   if (!area) return 0
@@ -141,7 +88,7 @@ function _generateOrderId() {
 }
 
 /* async function createReceiptPdf(order) {
-  const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+  const doc = new jsPDF({ unit: 'pt', format: 'a5' })
   const margin = 40
   let y = 50
 
@@ -249,17 +196,14 @@ function _generateOrderId() {
 } */
 
 function App() {
-  const [menuItems, setMenuItems] = useState(() => {
-    const stored = localStorage.getItem('weddee-menu')
-    return stored ? JSON.parse(stored) : initialMenu
-  })
+  const [menuItems, setMenuItems] = useState([])
   const [category, setCategory] = useState('All')
   const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem('weddee-cart')
     return stored ? JSON.parse(stored) : []
   })
   const [view, setView] = useState('menu')
-  const [showCart, setShowCart] = useState(false)
+  const [restaurantStatus, setRestaurantStatus] = useState(getRestaurantStatus())
   const [_guestMode, _setGuestMode] = useState(true)
   const [user, setUser] = useState({ name: '', email: '', phone: '' })
   const [checkoutMode, setCheckoutMode] = useState('delivery')
@@ -269,10 +213,7 @@ function App() {
   const [orderResult, setOrderResult] = useState(null)
   const [receiptEmailStatus, setReceiptEmailStatus] = useState(null)
   const [paymentMethod, setPaymentMethod] = useState('online')
-  const [orders, setOrders] = useState(() => {
-    const stored = localStorage.getItem('weddee-orders')
-    return stored ? JSON.parse(stored) : []
-  })
+  const [orders, setOrders] = useState([])
   const [adminTab, setAdminTab] = useState('orders')
   const [menuEdit, setMenuEdit] = useState({ name: '', category: 'Pastries', price: '', description: '', imageFile: null })
   const [searchTerm, setSearchTerm] = useState('')
@@ -289,6 +230,8 @@ function App() {
   const [scannerMessage, setScannerMessage] = useState('')
   const [scannerError, setScannerError] = useState('')
   const [scanResultOrder, setScanResultOrder] = useState(null)
+  const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'info', onConfirm: null })
+  const [selectedAdminOrder, setSelectedAdminOrder] = useState(null)
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const scanFrameRequestRef = useRef(null)
@@ -447,8 +390,13 @@ function App() {
   }, [cart])
 
   useEffect(() => {
-    localStorage.setItem('weddee-orders', JSON.stringify(orders))
-  }, [orders])
+    // Update restaurant status every minute
+    const statusInterval = setInterval(() => {
+      setRestaurantStatus(getRestaurantStatus())
+    }, 60000) // Update every minute
+    
+    return () => clearInterval(statusInterval)
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('weddee-admin-notifications', String(adminNotifications))
@@ -576,9 +524,8 @@ function App() {
   }, [category, menuItems, searchTerm])
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const taxes = +(subtotal * taxRate).toFixed(0)
   const deliveryFee = checkoutMode === 'delivery' ? getDeliveryFee(deliveryInfo.area) : 0
-  const total = subtotal + taxes + deliveryFee
+  const total = subtotal + deliveryFee
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
   const addToCart = (menuItem) => {
@@ -593,7 +540,6 @@ function App() {
       }
       return [...current, { ...menuItem, quantity: 1 }]
     })
-    setShowCart(true)
   }
 
   const updateQuantity = (id, value) => {
@@ -617,7 +563,7 @@ function App() {
       if (!response.ok || !data?.order) {
         console.error('Verify error', response.status, data)
         const message = data?.error || data?.detail?.message || 'Payment verification failed. Please try again.'
-        alert(message)
+        showModal('Payment Verification Failed', message)
         setPaymentStatus('idle')
         return
       }
@@ -636,7 +582,7 @@ function App() {
       localStorage.removeItem('weddee-pending-reference')
     } catch (error) {
       console.error('Payment verify failed', error)
-      alert('Payment verification failed. Please try again.')
+      showModal('Payment Verification Failed', 'Payment verification failed. Please try again.')
     } finally {
       setPaymentStatus('idle')
     }
@@ -644,17 +590,30 @@ function App() {
 
   const handleOrderSubmit = async () => {
     if (!cart.length) return
+    if (restaurantStatus !== 'open') {
+      showModal(
+        restaurantStatus === 'opening-soon' ? 'Opening Soon' : 'Store Closed',
+        restaurantStatus === 'opening-soon'
+          ? 'Orders will open at 8:30 AM. Please come back shortly.'
+          : 'We are closed for now. Ordering resumes at 8:30 AM tomorrow.',
+      )
+      return
+    }
     if (!user.name.trim()) {
-      return alert('Please enter your full name.')
+      showModal('Name Required', 'Please enter your full name.')
+      return
     }
     if (!user.email.trim()) {
-      return alert('Please enter your email address.')
+      showModal('Email Required', 'Please enter your email address.')
+      return
     }
     if (!user.phone.trim()) {
-      return alert('Please enter your phone number.')
+      showModal('Phone Required', 'Please enter your phone number.')
+      return
     }
     if (checkoutMode === 'delivery' && !deliveryInfo.area.trim()) {
-      return alert('Please select a delivery area from the notable locations.')
+      showModal('Delivery Area Required', 'Please select a delivery area from the notable locations.')
+      return
     }
 
     setPaymentStatus('processing')
@@ -673,7 +632,6 @@ function App() {
       deliveryNotes: checkoutMode === 'delivery' ? deliveryInfo.details : null,
       paymentMethod,
       subtotal,
-      taxes,
       deliveryFee,
       total,
     }
@@ -685,7 +643,6 @@ function App() {
       setCart([])
       localStorage.setItem('weddee-customer-email', order.customer.email)
       setView('confirmation')
-      setShowCart(false)
     }
 
     try {
@@ -702,7 +659,7 @@ function App() {
       if (!response.ok) {
         const errData = await response.json().catch(() => null)
         console.error('Order submit failed', errData)
-        alert(errData?.error || errData?.detail?.message || 'Unable to place order. Please try again.')
+        showModal('Order Failed', errData?.error || errData?.detail?.message || 'Unable to place order. Please try again.')
         setPaymentStatus('idle')
         return
       }
@@ -723,13 +680,13 @@ function App() {
           window.location.href = data.authorization_url
           return
         }
-        alert(data?.message || 'Unable to start Paystack payment. Please try again.')
+        showModal('Payment Setup Failed', data?.message || 'Unable to start Paystack payment. Please try again.')
         setPaymentStatus('idle')
         return
       }
     } catch (error) {
       console.error('Order submit error', error)
-      alert('Unable to place order. Please try again.')
+      showModal('Order Failed', 'Unable to place order. Please try again.')
     } finally {
       setPaymentStatus('idle')
     }
@@ -750,7 +707,7 @@ function App() {
 
     if (menuEdit.imageFile) {
       if (!adminToken) {
-        alert('You must be logged in as admin to upload images.')
+        showModal('Admin Login Required', 'You must be logged in as the owner to upload images.')
         return
       }
       const formData = new FormData()
@@ -766,14 +723,14 @@ function App() {
         if (!uploadResponse.ok) {
           const err = await uploadResponse.json().catch(() => null)
           console.error('Upload failed', err)
-          alert(err?.error || 'Failed to upload image. Please try again.')
+          showModal('Upload Failed', err?.error || 'Failed to upload image. Please try again.')
           return
         }
         const uploadData = await uploadResponse.json()
         imageUrl = buildAssetUrl(uploadData.imageUrl)
       } catch (error) {
         console.error('Upload error', error)
-        alert('Failed to upload image. Please try again.')
+        showModal('Upload Failed', 'Failed to upload image. Please try again.')
         return
       }
     }
@@ -800,13 +757,13 @@ function App() {
         if (!response.ok) {
           const err = await response.json().catch(() => null)
           console.error('Add product failed', err)
-          alert(err?.error || 'Unable to save product. Please try again.')
+          showModal('Save Failed', err?.error || 'Unable to save product. Please try again.')
           return
         }
         await fetchMenuItems()
       } catch (error) {
         console.error('Add product error', error)
-        alert('Unable to save product. Please try again.')
+        showModal('Save Failed', 'Unable to save product. Please try again.')
         return
       }
     } else {
@@ -818,7 +775,7 @@ function App() {
 
   const updateOrderStatus = async (id, status) => {
     if (!adminToken) {
-      alert('You must be logged in as admin to update order status.')
+      showModal('Admin Login Required', 'You must be logged in as the owner to update order status.')
       return
     }
 
@@ -835,7 +792,7 @@ function App() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
         console.error('Update status failed', errorData)
-        alert(errorData?.error || 'Unable to update order status.')
+        showModal('Update Failed', errorData?.error || 'Unable to update order status.')
         return
       }
 
@@ -856,33 +813,40 @@ function App() {
       }
     } catch (error) {
       console.error('Update order status error:', error)
-      alert('Error updating order status')
+      showModal('Update Failed', 'Error updating order status.')
     }
   }
 
   const deleteMenuItem = async (id) => {
     if (!adminToken) {
-      alert('You must be logged in as admin to delete products.')
+      showModal('Admin Login Required', 'You must be logged in as the owner to delete products.')
       return
     }
-    try {
-      const response = await fetch(buildApiUrl(`/api/products/${id}`), {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-        },
-      })
-      if (response.ok) {
-        await fetchMenuItems()
-      } else {
-        const errorData = await response.json().catch(() => null)
-        console.error('Delete failed', errorData)
-        alert(errorData?.error || 'Failed to delete product')
-      }
-    } catch (error) {
-      console.error('Delete error:', error)
-      alert('Error deleting product')
-    }
+    showModal(
+      'Delete Menu Item',
+      'This item will be removed from the customer menu until you add it again.',
+      'confirm',
+      async () => {
+        try {
+          const response = await fetch(buildApiUrl(`/api/products/${id}`), {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${adminToken}`,
+            },
+          })
+          if (response.ok) {
+            await fetchMenuItems()
+          } else {
+            const errorData = await response.json().catch(() => null)
+            console.error('Delete failed', errorData)
+            showModal('Delete Failed', errorData?.error || 'Failed to delete product.')
+          }
+        } catch (error) {
+          console.error('Delete error:', error)
+          showModal('Delete Failed', 'Error deleting product.')
+        }
+      },
+    )
   }
 
   const handleAdminLogin = async (e) => {
@@ -925,6 +889,27 @@ function App() {
     setAdminPassword('')
   }
 
+  const showModal = (title, message, type = 'info', onConfirm = null) => {
+    setModal({ isOpen: true, title, message, type, onConfirm })
+  }
+
+  const closeModal = () => {
+    setModal({ isOpen: false, title: '', message: '', type: 'info', onConfirm: null })
+  }
+
+  const handleModalConfirm = () => {
+    if (modal.onConfirm) {
+      modal.onConfirm()
+    }
+    closeModal()
+  }
+
+  const showHeroSection = view === 'menu'
+  const visibleCustomerOrders = customerOrders.filter((order) => {
+    const createdAt = Number(order?.createdAt || 0)
+    return Date.now() - createdAt < 24 * 60 * 60 * 1000
+  })
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -945,7 +930,7 @@ function App() {
           <button className="nav-button" onClick={() => setView('orders')}>
             My Orders
           </button>
-          <button className="nav-button" onClick={() => setShowCart((value) => !value)}>
+          <button className="nav-button" onClick={() => setView('cart')}>
             Cart ({cartCount})
           </button>
           <button className="nav-button admin-button" onClick={() => {
@@ -960,7 +945,7 @@ function App() {
         </nav>
       </header>
 
-      <div className="hero-banner">
+      {showHeroSection && <div className="hero-banner">
         <div>
           <p className="eyebrow">Calabar’s cozy pastry destination</p>
           <h1>
@@ -972,14 +957,44 @@ function App() {
         </div>
         <div className="hero-panel">
           <span>Open today</span>
-          <strong>7:00 AM – 8:30 PM</strong>
-          <span>Location: Marian, Calabar</span>
+          <strong>8:30 AM – 8:30 PM</strong>
+          <span>Location: Calabar, Cross River State, Nigeria</span>
         </div>
-      </div>
+      </div>}
 
       <main className="page-shell">
+        {restaurantStatus === 'closed' && view === 'menu' && (
+          <section className="closed-screen">
+            <div className="closed-card">
+              <div className="closed-icon">🕐</div>
+              <h2>We're currently closed</h2>
+              <p>Thanks for stopping by! We'll be open tomorrow at 8:30 AM.</p>
+              <div className="closed-hours">
+                <p><strong>Our Hours:</strong></p>
+                <p>8:30 AM – 8:30 PM, Daily</p>
+                <p>📍 Calabar, Cross River State, Nigeria</p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {restaurantStatus === 'opening-soon' && view === 'menu' && (
+          <section className="opening-soon-screen">
+            <div className="opening-soon-card">
+              <div className="opening-icon">⏰</div>
+              <h2>Opening soon!</h2>
+              <p>We're preparing fresh pastries and brewing coffee for you.</p>
+              <div className="opening-timer">
+                <p>Opens at <strong>8:30 AM</strong></p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {(restaurantStatus === 'open' || view !== 'menu') && (
+        <>
         {view === 'menu' && (
-          <section className="menu-page">
+            <section className="menu-page">
             <div className="menu-headline">
               <div>
                 <p className="eyebrow">Menu</p>
@@ -1031,6 +1046,86 @@ function App() {
                   </div>
                 </article>
               ))}
+            </div>
+          </section>
+        )}
+
+        {view === 'cart' && (
+          <section className="cart-page">
+            <div className="cart-container">
+              <div className="cart-header">
+                <p className="eyebrow">Your Cart</p>
+                <h2>Review your order</h2>
+              </div>
+
+              {cart.length ? (
+                <div className="cart-grid">
+                  <section className="cart-panel">
+                    <div className="cart-items">
+                      {cart.map((item) => (
+                        <div key={item.id} className="cart-row">
+                          <div>
+                            <p className="item-name">{item.name}</p>
+                            <p className="item-price">{formatNaira(item.price)} × {item.quantity}</p>
+                          </div>
+                          <div className="cart-item-actions">
+                            <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>−</button>
+                            <span>{item.quantity}</span>
+                            <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                            <button className="remove-link" onClick={() => removeFromCart(item.id)}>
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <aside className="cart-summary">
+                    <h3>Order summary</h3>
+                    {cart.map((item) => (
+                      <div key={item.id} className="summary-line">
+                        <div>
+                          <strong>{item.name}</strong>
+                          <p>{item.quantity} × {formatNaira(item.price)}</p>
+                        </div>
+                        <span>{formatNaira(item.price * item.quantity)}</span>
+                      </div>
+                    ))}
+                    <div className="summary-divider" />
+                    <div className="summary-line total-line">
+                      <span>Subtotal</span>
+                      <strong>{formatNaira(subtotal)}</strong>
+                    </div>
+                    {deliveryFee > 0 && (
+                      <div className="summary-line">
+                        <span>Delivery fee (estimated)</span>
+                        <strong>{formatNaira(deliveryFee)}</strong>
+                      </div>
+                    )}
+                    <div className="summary-line total-line">
+                      <span>Total</span>
+                      <strong>{formatNaira(total)}</strong>
+                    </div>
+                    <div className="cart-actions">
+                      <button className="primary-button" onClick={() => setView('checkout')} disabled={!cart.length}>
+                        Proceed to Checkout
+                      </button>
+                      <button className="secondary-button" onClick={() => setView('menu')}>
+                        Continue Shopping
+                      </button>
+                    </div>
+                  </aside>
+                </div>
+              ) : (
+                <div className="empty-cart-section">
+                  <p>Your cart is empty.</p>
+                  <p>Add items from the menu to get started.</p>
+                  <button className="primary-button" onClick={() => setView('menu')}>
+                    Browse Menu
+                  </button>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -1109,7 +1204,7 @@ function App() {
                         <option>12:00 PM</option>
                         <option>12:30 PM</option>
                       </select>
-                      <p className="help-text">Collect from Marian, Calabar at your scheduled time.</p>
+                      <p className="help-text">Collect from Calabar, Cross River State, Nigeria at your scheduled time.</p>
                     </div>
                   )}
 
@@ -1178,7 +1273,12 @@ function App() {
 
               <aside className="order-summary-card">
                 <h3>Order summary</h3>
-                {cart.map((item) => (
+                <div style={{ marginBottom: '16px' }}>
+                  <button className="secondary-button" onClick={() => setView('cart')} style={{ width: '100%' }}>
+                    ← View Full Cart
+                  </button>
+                </div>
+                {cart.slice(0, 3).map((item) => (
                   <div key={item.id} className="summary-line">
                     <div>
                       <strong>{item.name}</strong>
@@ -1187,14 +1287,13 @@ function App() {
                     <span>{formatNaira(item.price * item.quantity)}</span>
                   </div>
                 ))}
+                {cart.length > 3 && (
+                  <p style={{ fontSize: '0.9em', color: '#666', margin: '8px 0' }}>+{cart.length - 3} more items...</p>
+                )}
                 <div className="summary-divider" />
                 <div className="summary-line total-line">
                   <span>Subtotal</span>
                   <strong>{formatNaira(subtotal)}</strong>
-                </div>
-                <div className="summary-line">
-                  <span>Taxes</span>
-                  <strong>{formatNaira(taxes)}</strong>
                 </div>
                 {checkoutMode === 'delivery' && deliveryFee > 0 && (
                   <div className="summary-line">
@@ -1217,12 +1316,12 @@ function App() {
               <div className="orders-header">
                 <p className="eyebrow">Order History</p>
                 <h2>Your orders from WedDee’s</h2>
-                <p>Track your order status and view past purchases.</p>
+                <p>Track your order status. Delivered orders disappear here after 24 hours, but remain saved in the system.</p>
               </div>
 
-              {customerOrders.length ? (
+              {visibleCustomerOrders.length ? (
                 <div className="orders-list">
-                  {customerOrders.map((order) => (
+                  {visibleCustomerOrders.map((order) => (
                     <article key={order.id} className="order-history-card">
                       <div className="order-header">
                         <div>
@@ -1291,7 +1390,7 @@ function App() {
               <h2>Order confirmed.</h2>
               <p>
                 {orderResult.checkoutMode === 'pickup'
-                  ? `Your order is ready for pickup at Marian, Calabar. ${orderResult.paymentMethod === 'cod' ? 'Please pay cash when you collect your order.' : ''}`
+                  ? `Your order is ready for pickup in Calabar, Cross River State, Nigeria. ${orderResult.paymentMethod === 'cod' ? 'Please pay cash when you collect your order.' : ''}`
                   : `Your dispatch team will contact you shortly to complete delivery. ${orderResult.paymentMethod === 'cod' ? 'Please have cash ready for payment upon delivery.' : ''}`}
               </p>
               {receiptEmailStatus?.status === 'sent' && (
@@ -1374,8 +1473,7 @@ function App() {
           </div>
         )}
 
-        {view === 'admin-login' && !
-          adminToken && (
+        {view === 'admin-login' && !adminToken && (
           <section className="admin-login-section">
             <div className="admin-login-container">
               <div className="admin-login-card">
@@ -1419,7 +1517,7 @@ function App() {
                 <h2>Manage orders and menu items.</h2>
               </div>
               <div className="admin-header-actions">
-                <button className="secondary-button" onClick={() => {
+                <button className="secondary-button dashboard-action-button" onClick={() => {
                   setScannerError('')
                   setScannerMessage('')
                   setScanResultOrder(null)
@@ -1427,7 +1525,7 @@ function App() {
                 }}>
                   Verify receipt QR
                 </button>
-                <button className="secondary-button" onClick={() => {
+                <button className="secondary-button dashboard-action-button" onClick={() => {
                   handleAdminLogout()
                   setView('menu')
                 }}>
@@ -1457,17 +1555,61 @@ function App() {
                   <div className="order-list">
                     {orders.length ? orders.map((order) => (
                       <article key={order.id} className="order-card">
-                        <div>
-                          <h3>{order.id}</h3>
-                          <p>{new Date(order.createdAt).toLocaleString()}</p>
+                        <div className="order-card-header">
+                          <div>
+                            <h3>Order {order.receiptNumber || order.id}</h3>
+                            <p>{new Date(order.createdAt).toLocaleString()}</p>
+                          </div>
+                          <div className={`status-badge status-${order.status.toLowerCase()}`}>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </div>
                         </div>
-                        <div className="order-meta">
-                          <span>{order.checkoutMode}</span>
-                          <span>{order.status}</span>
+                        <div className="order-card-details">
+                          <div className="detail-row">
+                            <span className="label">Customer Name:</span>
+                            <span className="value">{order.customer.name}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="label">Phone:</span>
+                            <span className="value">{order.customer.contact}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="label">Email:</span>
+                            <span className="value">{order.customer.email}</span>
+                          </div>
+                          {order.checkoutMode === 'delivery' && (
+                            <>
+                              <div className="detail-row">
+                                <span className="label">Delivery Area:</span>
+                                <span className="value">{order.deliveryAddress}</span>
+                              </div>
+                              <div className="detail-row">
+                                <span className="label">Exact Address:</span>
+                                <span className="value">{order.deliveryNotes || 'Not provided'}</span>
+                              </div>
+                            </>
+                          )}
+                          <div className="detail-row">
+                            <span className="label">Mode:</span>
+                            <span className="value">{order.checkoutMode === 'delivery' ? 'Delivery' : 'Pickup'}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="label">Items:</span>
+                            <span className="value">{order.items.map(i => i.name).join(', ')}</span>
+                          </div>
+                          <div className="detail-row highlight">
+                            <span className="label">Total:</span>
+                            <span className="value">{formatNaira(order.total)}</span>
+                          </div>
+                        </div>
+                        <div className="owner-order-toolbar">
+                          <button className="primary-button owner-order-button" onClick={() => setSelectedAdminOrder(order)}>
+                            View full details
+                          </button>
                         </div>
                         <div className="order-actions">
                           {['Pending', 'Preparing', 'Ready', 'Completed'].map((status) => (
-                            <button key={status} onClick={() => updateOrderStatus(order.id, status)}>
+                            <button key={status} className="status-button" onClick={() => updateOrderStatus(order.id, status)}>
                               {status}
                             </button>
                           ))}
@@ -1489,6 +1631,7 @@ function App() {
                           <option>Pastries</option>
                           <option>Drinks</option>
                           <option>Combos</option>
+                          <option>Food</option>
                           <option>Specials</option>
                         </select>
                       </label>
@@ -1547,78 +1690,83 @@ function App() {
             </div>
           </section>
         )}
+        </>
+      )}
       </main>
 
-      <aside className={showCart ? 'cart-drawer open' : 'cart-drawer'}>
-        <div className="drawer-header">
-          <div>
-            <p className="eyebrow">Your Cart</p>
-            <strong>{cartCount} items</strong>
+      {modal.isOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{modal.title}</h2>
+              <button className="modal-close" onClick={closeModal}>×</button>
+            </div>
+            <div className="modal-body">
+              <p>{modal.message}</p>
+            </div>
+            <div className="modal-footer">
+              <button className="modal-button" onClick={handleModalConfirm}>
+                OK
+              </button>
+            </div>
           </div>
-          <button className="close-button" onClick={() => setShowCart(false)}>
-            ×
-          </button>
         </div>
-        <div className="drawer-body">
-          {cart.length ? (
-            cart.map((item) => (
-              <div key={item.id} className="drawer-item">
+      )}
+
+      {selectedAdminOrder && (
+        <div className="modal-overlay" onClick={() => setSelectedAdminOrder(null)}>
+          <div className="modal-dialog admin-order-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Order {selectedAdminOrder.receiptNumber || selectedAdminOrder.id}</h2>
+              <button className="modal-close" onClick={() => setSelectedAdminOrder(null)}>x</button>
+            </div>
+            <div className="modal-body admin-order-modal-body">
+              <div className="admin-order-detail-grid">
                 <div>
-                  <p className="drawer-name">{item.name}</p>
-                  <p className="drawer-copy">{formatNaira(item.price)} × {item.quantity}</p>
+                  <p className="receipt-label">Customer</p>
+                  <strong>{selectedAdminOrder.customer?.name || 'Not provided'}</strong>
                 </div>
-                <div className="drawer-actions">
-                  <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                  <button className="remove-link" onClick={() => removeFromCart(item.id)}>
-                    Remove
-                  </button>
+                <div>
+                  <p className="receipt-label">Phone</p>
+                  <strong>{selectedAdminOrder.customer?.contact || 'Not provided'}</strong>
+                </div>
+                <div>
+                  <p className="receipt-label">Email</p>
+                  <strong>{selectedAdminOrder.customer?.email || 'Not provided'}</strong>
+                </div>
+                <div>
+                  <p className="receipt-label">Mode</p>
+                  <strong>{selectedAdminOrder.checkoutMode === 'pickup' ? 'Pickup' : 'Delivery'}</strong>
+                </div>
+                <div>
+                  <p className="receipt-label">Location</p>
+                  <strong>{selectedAdminOrder.deliveryAddress || 'Pickup in Calabar, Cross River State, Nigeria'}</strong>
+                </div>
+                <div>
+                  <p className="receipt-label">Exact address</p>
+                  <strong>{selectedAdminOrder.deliveryNotes || 'Not provided'}</strong>
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="empty-cart">
-              <p>Your cart is empty.</p>
-              <p>Tap any pastry or drink to add it.</p>
+              <div className="admin-order-items">
+                {selectedAdminOrder.items.map((item) => (
+                  <div key={`${selectedAdminOrder.id}-${item.id}`} className="order-item">
+                    <div>
+                      <strong>{item.name}</strong>
+                      <p>{item.quantity} x {formatNaira(item.price)}</p>
+                    </div>
+                    <span>{formatNaira(item.price * item.quantity)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
+            <div className="modal-footer">
+              <button className="modal-button" onClick={() => setSelectedAdminOrder(null)}>
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-        {orderResult && (
-          <div className="drawer-order-tracker">
-            <h3>Order status</h3>
-            <p><strong>Tracking ID:</strong> {orderResult.receiptNumber || orderResult.id}</p>
-            <p><strong>Status:</strong> {orderResult.status}</p>
-            <p><strong>Total:</strong> {formatNaira(orderResult.total)}</p>
-            <button className="secondary-button" onClick={() => {
-              setView('orders')
-              setShowCart(false)
-            }}>
-              View all orders
-            </button>
-          </div>
-        )}
-        <div className="drawer-footer">
-          <div className="summary-row">
-            <span>Subtotal</span>
-            <strong>{formatNaira(subtotal)}</strong>
-          </div>
-          <div className="summary-row">
-            <span>Taxes</span>
-            <strong>{formatNaira(taxes)}</strong>
-          </div>
-          <div className="summary-row total-row">
-            <span>Total</span>
-            <strong>{formatNaira(total)}</strong>
-          </div>
-          <button className="primary-button" disabled={!cart.length} onClick={() => {
-            setView('checkout')
-            setShowCart(false)
-          }}>
-            View cart & checkout
-          </button>
-        </div>
-      </aside>
+      )}
     </div>
   )
 }
